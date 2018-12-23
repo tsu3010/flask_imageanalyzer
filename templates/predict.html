@@ -1,0 +1,22 @@
+{% extends "base.html" %} {% block content %}
+
+
+
+<h3 style="margin: auto;width: 80%; text-align: center; margin-top: 20px;  text-transform: uppercase"> Image Quality Analyzer - Results </h3>
+
+<div style="width: 90%; margin: auto; text-align: center">
+
+    <img src="{{ url_for('send_file', filename=image_file_name)}}" style ="max-width: 500px; max-height: 450px; margin-top: 30px; margin-bottom: 10px">
+
+    <p style="font-style: italic">{{ image_file_name }}</p>
+
+    <h3 style="margin-top: 40px"><b> Blurriness Score : <span style="color: green">{{ blur_value }}</span></b></h3>
+
+    <h3 style="margin-top: 40px"><b> Noise Score : <span style="color: red">{{ blur_value }}</span></b></h3>
+
+    <h3 style="margin-top: 40px"><b> Uniformity Score : <span style="color: blue">{{ blur_value }}</span></b></h3>
+
+</div>
+
+
+{% endblock %}
