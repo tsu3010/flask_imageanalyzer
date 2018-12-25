@@ -4,6 +4,9 @@ import glob
 import re
 import numpy as np
 import cv2
+from PIL import Image as IMG
+from skimage import feature
+from skimage.restoration import estimate_sigma
 from flask import Flask, redirect, url_for, request, render_template, send_from_directory
 
 
@@ -18,11 +21,24 @@ STATIC_FOLDER = 'static'
 # Use Image path to make computation
 
 
-def image_feature_predict(img_path):
+def estimate_blurriness(img_path):
     image = cv2.imread(img_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    blur = cv2.Laplacian(image, cv2.CV_64F).var()
-    return blur
+    fm = cv2.Laplacian(image, cv2.CV_64F).var()
+    return fm
+
+
+def estimate_uniformity(img_path):
+    im = IMG.open(img_path)
+    im_array = np.asarray(im.convert(mode='L'))
+    edges_sigma1 = feature.canny(im_array, sigma=3)
+    apw = (float(np.sum(edges_sigma1)) / (im.size[0] * im.size[1]))
+    return apw
+
+
+def estimate_noise(img_path):
+    image = cv2.imread(img_path)
+    return estimate_sigma(image, multichannel=True, average_sigmas=True)
 
 
 @app.route('/', methods=['GET'])
@@ -43,10 +59,10 @@ def upload_file():
         full_name = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(full_name)
         # Make feature computation
-        preds = round(image_feature_predict(full_name), 2)
-        # Process your result for human
-        result = str(preds)    # Convert to string
-    return render_template('predict.html', image_file_name=file.filename, blur_value=result)
+        blur = str(round(estimate_blurriness(full_name), 2))
+        apw = str(round(estimate_uniformity(full_name), 2))
+        noise = str(round(estimate_noise(full_name), 2))
+    return render_template('predict.html', image_file_name=file.filename, blur_value=blur, apw_value=apw, noise_value=noise)
 
 
 @app.route('/uploads/<filename>')
