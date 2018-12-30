@@ -3,6 +3,7 @@ import os
 import glob
 import re
 import numpy as np
+import pandas as pd
 import cv2
 from PIL import Image as IMG
 from skimage import feature
@@ -41,6 +42,23 @@ def estimate_noise(img_path):
     return estimate_sigma(image, multichannel=True, average_sigmas=True)
 
 
+def compute_quality(blur, threshold1=40, threshold2=70):
+    blur_list = [blur.tolist()]
+    blur_df = pd.DataFrame({'blur': blur_list})
+    blur_df['labels'] = pd.cut(blur_df.blur, [0, threshold1, threshold2, float("inf")], labels=['Poor', 'Average', 'Good'])
+    return blur_df['labels'].iloc[0]
+
+
+def font_color(quality):
+    if quality == 'Poor':
+        col = 'red'
+    elif quality == 'Average':
+        col = 'orange'
+    else:
+        col = 'green'
+    return col
+
+
 @app.route('/', methods=['GET'])
 def index():
     # Main page
@@ -59,10 +77,14 @@ def upload_file():
         full_name = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(full_name)
         # Make feature computation
-        blur = str(round(estimate_blurriness(full_name), 2))
-        apw = str(round(estimate_uniformity(full_name), 2))
-        noise = str(round(estimate_noise(full_name), 2))
-    return render_template('predict.html', image_file_name=file.filename, blur_value=blur, apw_value=apw, noise_value=noise)
+        blur_val = round(estimate_blurriness(full_name), 3)
+        blur = str(blur_val)
+        apw = str(round(estimate_uniformity(full_name), 3))
+        noise = str(round(estimate_noise(full_name), 4))
+        # Compute Quality
+        quality = str(compute_quality(blur_val))
+        color = str(font_color(quality))
+    return render_template('predict.html', image_file_name=file.filename, blur_value=blur, apw_value=apw, noise_value=noise, quality_string=quality, color_string=color)
 
 
 @app.route('/uploads/<filename>')

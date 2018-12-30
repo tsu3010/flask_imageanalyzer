@@ -10,11 +10,13 @@
 
     <p style="font-style: italic">{{ image_file_name }}</p>
 
-    <h3 style="margin-top: 40px"><b> Blurriness Score : <span style="color: green">{{ blur_value }}</span></b></h3>
+    <h3 style="margin-top: 40px"><b> Blurriness Score : <span style="color: blue">{{ blur_value }}</span></b></h3>
 
-    <h3 style="margin-top: 40px"><b> Noise Score : <span style="color: green">{{ noise_value }}</span></b></h3>
+    <h3 style="margin-top: 40px"><b> Noise Score : <span style="color: blue">{{ noise_value }}</span></b></h3>
 
-    <h3 style="margin-top: 40px"><b> Uniformity Score : <span style="color: orange">{{ apw_value }}</span></b></h3>
+    <h3 style="margin-top: 40px"><b> Uniformity Score : <span style="color: blue">{{ apw_value }}</span></b></h3>
+
+        <h3 style="margin-top: 40px"><b> Verdict - Image Quality is <span style="color: {{ color_string }}">{{ quality_string }}</span></b></h3>
 
 </div>
 
